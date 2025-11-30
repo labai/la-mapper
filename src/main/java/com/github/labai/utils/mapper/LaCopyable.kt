@@ -1,4 +1,5 @@
-MIT License
+/*
+The MIT License (MIT)
 
 Copyright (c) 2022 Augustus
 
@@ -19,3 +20,25 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+*/
+package com.github.labai.utils.mapper
+
+import com.github.labai.utils.mapper.LaMapper.MappingBuilder
+
+/*
+ * @author Augustus
+ * created on 2025-11-24
+ *
+ * Can be used for cloning objects
+ *
+ * Example:
+ *  class Dto(val a1: String, var a2: String) : LaCopyable
+ *  val acopy: Dto = dto.laCopy()
+ *
+*/
+interface LaCopyable
+
+inline fun <reified T : Any> LaCopyable.laCopy(noinline mapping: (MappingBuilder<T, T>.() -> Unit)? = null): T {
+    check(this is T) { "both sides must be of same type for copying (${this::class} vs ${T::class})" }
+    return LaMapper.copyFrom(this, mapping)
+}

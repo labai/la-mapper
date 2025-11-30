@@ -1,6 +1,7 @@
-MIT License
+/*
+The MIT License (MIT)
 
-Copyright (c) 2022 Augustus
+Copyright (c) 2025 Augustus
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,3 +20,19 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+*/
+package com.github.labai.utils.targetbuilder
+
+/*
+ * @author Augustus
+ * created on 2025-06-29
+ *
+ * (experimental)
+*/
+interface ITargetBuilderStringFactory<To : Any> {
+    fun instance(): IBuilder<To>
+    interface IBuilder<To : Any> {
+        fun add(name: String?, value: String?): IBuilder<To>
+        fun build(): To
+    }
+}
