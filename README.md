@@ -174,5 +174,5 @@ Special pseudo-variables are used here:
 - `t` - for accessing target ("to") class fields
 - `f` - for accessing source ("from") class fields
 
-See more in [LaMapper](la-mapper/docs/usage.md).
+See more in [LaMapper](config/docs/usage.md) features page.
 
