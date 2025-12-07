@@ -113,6 +113,16 @@ class LaMapper(
             return global.copyFields(from, to, Fr::class, To::class, mapping)
         }
 
+        fun <Fr : Any, To : Any> copyFields(
+            from: Fr,
+            to: To,
+            sourceType: KClass<Fr>,
+            targetType: KClass<To>,
+            mapping: (MappingBuilder<Fr, To>.() -> Unit)? = null,
+        ) {
+            return global.copyFields(from, to, sourceType, targetType, mapping)
+        }
+
         inline fun <reified Fr : Any, reified To : Any> autoMapper(
             noinline mapping: (MappingBuilder<Fr, To>.() -> Unit)? = null,
         ): AutoMapper<Fr, To> {

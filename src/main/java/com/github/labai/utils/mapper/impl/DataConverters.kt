@@ -158,6 +158,7 @@ internal class DataConverters(
         return ITypeConverter { convFn.convert(mainProp.get(it as Any))?.let { res -> mainConstr.call(res) } }
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun runtimeConverter(targetKlass: KClass<out Any>): ConvFn {
         return ConvFn {
             if (it == null) {

@@ -161,6 +161,19 @@ class LaMapperJTest {
         assertEquals(rec, res);
     }
 
+    @Test
+    void test5_closure() {
+        var from = getMock();
+
+        for (int i = 1; i <= 2; i++) {
+            int finalI = i;
+            var res = LaMapperJ.copyFrom(from, Test1Pojo.class, asList(
+                mapFrom("field1", f -> "str" + finalI)
+            ));
+            assertEquals("str" + i, res.field1);
+        }
+    }
+
     private Test1Pojo getMock() {
         var o = new Test1Pojo();
         o.field1 = "f1";

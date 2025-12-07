@@ -34,6 +34,11 @@ import java.util.function.Function;
  *
  * Simplified for Java usage.
  *
+ * PersonDto to = LaMapperJ.copyFrom(from, PersonDto.class, List.of(
+ *   mapFrom("code", f -> f.personCode),
+ *   mapFrom("name", f -> f.firstName + " " + f.surname)
+ * ));
+ *
  * Uses 'global' instance of LaMapper, so default configuration in LaMapper is valid here.
  * Also, it uses 'global' laConverter instance, so converters can be setup directly in LaConverterRegistry:
  *  - LaConverterRegistry.registerGlobalConverter()
