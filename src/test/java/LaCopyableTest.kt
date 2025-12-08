@@ -22,10 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 import com.github.labai.utils.mapper.LaCopyable
+import com.github.labai.utils.mapper.assignFields
 import com.github.labai.utils.mapper.laCopy
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 /*
  * @author Augustus
@@ -33,11 +33,11 @@ import org.junit.jupiter.api.assertThrows
 */
 class LaCopyableTest {
 
-    class Sample(val a1: String) : LaCopyable {
+    class Sample(val a1: String) : LaCopyable<Sample> {
         var a2: String? = "abc"
     }
 
-    open class DtoPar1 : LaCopyable {
+    open class DtoPar1 {
         var p1: String? = null
     }
 
@@ -45,7 +45,7 @@ class LaCopyableTest {
         var p2: String?
     }
 
-    class Dto(val a1: String, var a2: String) : DtoPar1(), IDtoPar2 {
+    class Dto(val a1: String, var a2: String) : DtoPar1(), IDtoPar2, LaCopyable<Dto> {
         var a3: String? = null
         override var p2: String? = "x"
     }
@@ -77,19 +77,6 @@ class LaCopyableTest {
     }
 
     @Test
-    fun test_lacopy_whenTargetParent_createParentOnly() {
-        val dto = Dto("a1-fr", "a2-fr").apply {
-            a3 = "a3-fr"
-            p1 = "p1-fr"
-            p2 = "p2-fr"
-        }
-        val res: DtoPar1 = dto.laCopy()
-        assertEquals(dto.p1, res.p1)
-
-        assertThrows<ClassCastException> { res as Dto }
-    }
-
-    @Test
     fun test_lacopy_copyWithMapping() {
         val dto = Dto("a1-fr", "a2-fr").apply {
             a3 = "a3-fr"
@@ -107,5 +94,34 @@ class LaCopyableTest {
         assertEquals(dto.a3, res.a3)
         assertEquals(dto.p2, res.p1)
         assertEquals(dto.p2, res.p2)
+    }
+
+    @Test
+    fun test_assignFields() {
+        val main = Dto("a1-to", "a2-to").apply {
+            a3 = "a3-to"
+            p1 = "p1-to"
+            p2 = "p2-to"
+        }
+        val from1 = Dto("a1-fr1", "a2-fr1").apply {
+            a3 = "a3-fr1"
+            p1 = "p1-fr1"
+            p2 = "p2-fr1"
+        }
+
+        val sample2 = Sample("a1-fr2").apply {
+            a2 = "a2-fr2"
+        }
+
+        main.assignFields(from1) {
+            t::p1 from f::p2
+        }
+        main.assignFields(sample2)
+
+        assertEquals("a1-to", main.a1) // immutable
+        assertEquals("a2-fr2", main.a2)
+        assertEquals("a3-fr1", main.a3)
+        assertEquals("p2-fr1", main.p1)
+        assertEquals("p2-fr1", main.p2)
     }
 }

@@ -32,13 +32,36 @@ import com.github.labai.utils.mapper.LaMapper.MappingBuilder
  * Can be used for cloning objects
  *
  * Example:
- *  class Dto(val a1: String, var a2: String) : LaCopyable
- *  val acopy: Dto = dto.laCopy()
+ *   class Dto(val a1: String, var a2: String) : LaCopyable<Dto>
+ *   val acopy: Dto = dto.laCopy()
+ *
+ * Also may assign field to the existing object from another one:
+ *   dto.assignFields(other)
  *
 */
-interface LaCopyable
+interface LaCopyable<T>
 
-inline fun <reified T : Any> LaCopyable.laCopy(noinline mapping: (MappingBuilder<T, T>.() -> Unit)? = null): T {
+inline fun <reified T : Any> LaCopyable<T>.laCopy(): T {
     check(this is T) { "both sides must be of same type for copying (${this::class} vs ${T::class})" }
-    return LaMapper.copyFrom(this, mapping)
+    return LaMapper.copyFrom(this, T::class, T::class, null)
 }
+
+inline fun <reified T : Any> LaCopyable<T>.laCopy(noinline mapping: (MappingBuilder<T, T>.() -> Unit)?): T {
+    check(this is T) { "both sides must be of same type for copying (${this::class} vs ${T::class})" }
+    return LaMapper.copyFrom(this, T::class, T::class, mapping)
+}
+
+inline fun <reified To : Any, reified Fr : Any> LaCopyable<To>.assignFields(from: Fr, noinline mapping: (MappingBuilder<Fr, To>.() -> Unit)? = null) {
+    check(this is To) { "Target class invalid" }
+    LaMapper.copyFields(from, this, Fr::class, To::class, mapping)
+}
+
+// this is an alternative, if don't want to use generics in interface
+//
+// interface LaClonable
+//
+// inline fun <reified T : Any> LaClonable.clone(noinline mapping: (MappingBuilder<T, T>.() -> Unit)? = null): T {
+//     check(this is T) { "both sides must be of same type for copying (${this::class} vs ${T::class})" }
+//     return LaMapper.copyFrom(this, mapping)
+// }
+//
