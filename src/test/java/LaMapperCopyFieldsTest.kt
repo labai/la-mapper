@@ -72,14 +72,60 @@ class LaMapperCopyFieldsTest {
             exclude(t::a2, t::a3)
             exclude(t::a3)
             t::a2 from f::a0
-            t::a4 from f::a3
         }
         mapper1.copyFields(fr, to)
-        assertEquals("a0-to", to.a0)
         assertEquals("a1-fr", to.a1)
         assertEquals("a0-fr", to.a2)
         assertEquals("a3-to", to.a3)
-        assertEquals("a3-fr", to.a4)
+        assertEquals("a4-fr", to.a4)
+    }
+
+    @ParameterizedTest
+    @MethodSource(ENGINES)
+    fun test2_copyFields_includeList_combineAllIncludes(engine: String) {
+        val (fr, to) = getTestDto()
+
+        val mapper1 = MappersConfig.getFieldCopier<TestDto, TestDto>(engine) {
+            include(t::a1, t::a2)
+            include(t::a2, t::a3)
+        }
+        mapper1.copyFields(fr, to)
+        assertEquals("a1-fr", to.a1)
+        assertEquals("a2-fr", to.a2)
+        assertEquals("a3-fr", to.a3)
+        assertEquals("a4-to", to.a4)
+    }
+
+    @ParameterizedTest
+    @MethodSource(ENGINES)
+    fun test2_copyFields_includeVsExclude_excludeIsPriority(engine: String) {
+        val (fr, to) = getTestDto()
+
+        val mapper1 = MappersConfig.getFieldCopier<TestDto, TestDto>(engine) {
+            include(t::a1, t::a2)
+            exclude(t::a2)
+        }
+        mapper1.copyFields(fr, to)
+        assertEquals("a1-fr", to.a1)
+        assertEquals("a2-to", to.a2) // excluded
+        assertEquals("a4-to", to.a4) // not in the include list
+    }
+
+    @ParameterizedTest
+    @MethodSource(ENGINES)
+    fun test2_copyFields_includeVsMapping_manualIsPriority(engine: String) {
+        val (fr, to) = getTestDto()
+
+        val mapper1 = MappersConfig.getFieldCopier<TestDto, TestDto>(engine) {
+            include(t::a1, t::a2)
+            t::a2 from f::a0
+            t::a4 from { "b" }
+        }
+        mapper1.copyFields(fr, to)
+        assertEquals("a1-fr", to.a1)
+        assertEquals("a0-fr", to.a2) // from manual
+        assertEquals("a3-to", to.a3)
+        assertEquals("b", to.a4) // in addition to include()
     }
 
     @ParameterizedTest

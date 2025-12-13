@@ -77,6 +77,7 @@ internal class MappedStruct<Fr : Any, To : Any>(
     serviceContext: ServiceContext,
     internal val hasClosure: Boolean = false,
     excludeFields: Set<String> = setOf(),
+    includedFields: Set<String> = setOf(), // empty - include all
     skipObjectCreation: Boolean = false, // do not try to create object (only for copyFields)
 ) : IMappedStruct<Fr, To> {
     override val targetConstructor: KFunction<To>?
@@ -101,12 +102,20 @@ internal class MappedStruct<Fr : Any, To : Any>(
         val targetFieldMap: Map<String, PropertyWriter<To>> = getTargetMemberProps(targetType)
             .associateBy { it.name }
         val targetArgsMandatory: Array<KParameter> = targetConstructor?.parameters
-            ?.filter { it.name in manualMappers || it.name in propMappers || it.name in sourceStruct || !it.isOptional }
+            ?.filter {
+                it.name in manualMappers ||
+                    it.name in propMappers ||
+                    (it.name in sourceStruct && (includedFields.isEmpty() || it.name in includedFields)) ||
+                    !it.isOptional
+            }
             ?.toTypedArray()
             ?: arrayOf() // may be null for Java classes - then will use no-arg constructor
 
         val skipAutoFields = excludeFields + manualMappers.keys + propMappers.keys + targetArgsMandatory.mapNotNull { it.name }
-        val autoProp = initPropAutoMappers(sourceStruct, targetType, skipAutoFields)
+        val skipFilterFn: (String) -> (Boolean) = { name ->
+            name in skipAutoFields || (includedFields.isNotEmpty() && name !in includedFields)
+        }
+        val autoProp = initPropAutoMappers(sourceStruct, targetType, skipFilterFn)
         val manProp = initPropManualMappers(sourceStruct, targetType, propMappers)
         propAutoBinds = (autoProp + manProp).toTypedArray()
 
@@ -231,10 +240,10 @@ internal class MappedStruct<Fr : Any, To : Any>(
     private fun initPropAutoMappers(
         sourceStruct: ISourceStruct<Fr>,
         targetClass: KClass<To>,
-        skip: Set<String>,
+        skipFilterFn: (String) -> (Boolean),
     ): List<PropAutoBind<Fr, To>> {
         return getTargetMemberProps(targetClass)
-            .filterNot { it.name in skip }
+            .filterNot { skipFilterFn(it.name) }
             .mapNotNull {
                 val pfr = sourceStruct.get(it.name) ?: return@mapNotNull null
                 val convNnFn = dataConverters.getConverterNn(pfr.klass, it.klass, it.returnType.isMarkedNullable)

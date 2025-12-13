@@ -67,6 +67,7 @@ internal class LaMapperImpl(
         private val targetType: KClass<To>,
         private var manualMappings: Map<String, IMappingBuilderItem<Fr>> = mapOf(),
         private val excludedFields: Set<String> = setOf(),
+        private val includedFields: Set<String> = setOf(),
         private val skipObjectCreation: Boolean = false,
     ) : IAutoMapping<Fr, To> {
 
@@ -89,6 +90,7 @@ internal class LaMapperImpl(
                             manualMappings.filter { it.value is LambdaMapping }.mapValues { it.value as LambdaMapping },
                             manualMappings.any { it.value is LambdaMapping && (it.value as LambdaMapping<Fr>).isClosure },
                             excludedFields,
+                            includedFields,
                             skipObjectCreation,
                         )
                         activeMapper = ReflectionAutoMapper(struct, serviceContext)

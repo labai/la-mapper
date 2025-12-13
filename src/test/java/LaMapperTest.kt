@@ -366,6 +366,31 @@ class LaMapperTest {
         assertEquals(5, res3.v01)
     }
 
+    class Test14Dto(val a0: String) {
+        var a1: String = "a1"
+        var a2: String = "a2"
+        var a3: String = "a3"
+        var a4: String = "a4"
+    }
+
+    @ParameterizedTest
+    @MethodSource(MappersConfig.ENGINES)
+    fun test14_copyFields_includeVsMapping_manualIsPriority(engine: String) {
+        val fr = Test14Dto("a0-fr").apply { a1 = "a1-fr"; a2 = "a2-fr"; a3 = "a3-fr"; a4 = "a4-fr" }
+
+        val mapper1 = MappersConfig.getMapper<Test14Dto, Test14Dto>(engine) {
+            include(t::a1, t::a2, t::a3)
+            exclude(t::a3)
+            t::a2 from f::a0
+            t::a4 from { "b" }
+        }
+        val to = mapper1.transform(fr)
+        assertEquals("a1-fr", to.a1)
+        assertEquals("a0-fr", to.a2) // from manual
+        assertEquals("a3", to.a3) // excluded (default value)
+        assertEquals("b", to.a4) // in addition to include()
+    }
+
     private fun assertEqBigDecimal(expectedAsStr: String, value: BigDecimal) {
         assertTrue(value.compareTo(BigDecimal(expectedAsStr)) == 0, "Expected '$expectedAsStr', got '$value'")
     }

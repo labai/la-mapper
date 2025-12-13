@@ -94,12 +94,11 @@ Where:
 ⚠️ _They are only for property references — not real objects._
 Expressions like t.code = f.personCode are invalid.
 
-
-## 3.  Copying into an existing object
+## 3. Copying into an existing object
 
 ```kotlin
 LaMapper.copyFields(from, to) {
-    exclude(t::name)
+    exclude(t::name) 
     t::address from f::clientAddress
 }
 ```
@@ -108,16 +107,41 @@ This:
 - allows excluding selected fields
 - supports overriding or adding custom mapping
 
-## 4. Using LaCopyable for object cloning
+## 4. Use exclude or include field list
 
-Classes that implement `LaCopyable` get free copying via `laCopy()`:
+It is possible to specify a list of fields to exclude from or include in auto-mapping:
+
+`exclude(field1, ...)` - allows excluding specific fields from auto-mapping.
+
+`include(field1, ...)` - allows defining the list of fields to be used for mapping.
+
+⚠️ If at least one field is included, only those fields will be used for mapping and all others will be excluded. 
+If no fields are included, all fields are included by default.
+
+## 5. Using LaCopyable for object cloning
+
+Classes that implement `LaCopyable` get free copying via `laCopy()` (v0.3.2):
 
 ```kotlin
-class Sample(val a1: String) : LaCopyable {
+class Sample(val a1: String) : LaCopyable<Sample> {
     var a2: String? = null
 }
 val sample = Sample("A1").apply { a2 = "A2" }
-val copy: Sample = sample.laCopy()
+val copy = sample.laCopy()
+```
+
+Also, may assign field from another object:
+
+```kotlin
+class Sample(val a1: String) : LaCopyable<Sample> {
+    var a2: String? = null
+}
+val obj1 = Sample("A1").apply { a2 = "A2"; a3 = "A3" }
+val obj2 = Sample("B1").apply { a2 = "B2"; a3 = "B3" }
+
+obj2.assignFields(obj1) {
+    t::a3 from f::a1
+}
 ```
 
 ## Java example

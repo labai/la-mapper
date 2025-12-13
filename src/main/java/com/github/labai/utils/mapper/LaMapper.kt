@@ -203,9 +203,9 @@ class LaMapper(
             builder.mapping()
             if (builder.hasClosure && laMapperImpl.serviceContext.config.disableClosureLambdas)
                 throw IllegalArgumentException("Mapping lambda contains closures (access objects out of lambda) but closures are disabled in LaMapper config")
-            laMapperImpl.AutoMapperImpl(sourceType, targetType, builder.map, builder.excluded, onExistingTargetOnly)
+            laMapperImpl.AutoMapperImpl(sourceType, targetType, builder.map, builder.excluded, builder.included, onExistingTargetOnly)
         } else {
-            laMapperImpl.AutoMapperImpl(sourceType, targetType, emptyMap(), setOf(), onExistingTargetOnly)
+            laMapperImpl.AutoMapperImpl(sourceType, targetType, emptyMap(), setOf(), setOf(), onExistingTargetOnly)
         }
     }
 
@@ -310,12 +310,21 @@ class LaMapper(
         val t: To = dummy()
 
         internal val excluded: MutableSet<String> = mutableSetOf()
+        internal val included: MutableSet<String> = mutableSetOf()
 
         /** list of field to exclude for copying */
         fun <F> exclude(vararg targetRefs: KCallable<F>?) {
             for (field in targetRefs) {
                 val toName = field?.name ?: error("mapper exclude param is null")
                 excluded.add(toName)
+            }
+        }
+
+        /** list of field to include for copying */
+        fun <F> include(vararg targetRefs: KCallable<F>?) {
+            for (field in targetRefs) {
+                val toName = field?.name ?: error("mapper include param is null")
+                included.add(toName)
             }
         }
 

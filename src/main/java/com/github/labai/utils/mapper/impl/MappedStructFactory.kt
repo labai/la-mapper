@@ -54,6 +54,7 @@ internal class MappedStructFactory(private val serviceContext: ServiceContext) {
         manualMappers: Map<String, LambdaMapping<Fr>> = mapOf(),
         hasClosure: Boolean = false,
         excludedFields: Set<String> = setOf(),
+        includedFields: Set<String> = setOf(),
         skipObjectCreation: Boolean = false,
     ): MappedStruct<Fr, To> {
         val sourceStruct: ISourceStruct<Fr> = if (sourceType.isSubclassOf(Map::class)) {
@@ -72,6 +73,7 @@ internal class MappedStructFactory(private val serviceContext: ServiceContext) {
             serviceContext,
             hasClosure,
             excludedFields,
+            includedFields,
             skipObjectCreation,
         )
     }
